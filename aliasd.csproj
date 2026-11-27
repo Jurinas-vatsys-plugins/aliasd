@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AliasPlugin</AssemblyName>
+    <RootNamespace>AliasPlugin</RootNamespace>
+    <TargetFramework>net472</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Version>1.0.1</Version>
+    <Product>aliasd</Product>
+    <Description>CRC-style alias expansion for vatSys</Description>
+    <VatSysBin Condition="'$(VatSysBin)' == ''">C:\Program Files (x86)\vatSys\bin</VatSysBin>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- vatSys itself: compile-time reference only, never copied to the output -->
+    <Reference Include="vatSys">
+      <HintPath>$(VatSysBin)\vatSys.exe</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RossCarlson.Vatsim.Network">
+      <HintPath>$(VatSysBin)\RossCarlson.Vatsim.Network.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Alias.txt" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Alias.txt')" />
+    <None Include="AliasPlugin.ini" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="dist\**" />
+    <None Remove="dist\**" />
+  </ItemGroup>
+</Project>

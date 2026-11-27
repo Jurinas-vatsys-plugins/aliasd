@@ -1,0 +1,67 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          # Next patch after the latest vX.Y.Z tag; the first release is 1.0.1.
+          $tags = git tag --list 'v*' | Where-Object { $_ -match '^v\d+\.\d+\.\d+$' }
+          if ($tags) {
+            $latest = $tags | ForEach-Object { [version]($_.TrimStart('v')) } | Sort-Object | Select-Object -Last 1
+            $next = "{0}.{1}.{2}" -f $latest.Major, $latest.Minor, ($latest.Build + 1)
+          } else {
+            $next = "1.0.1"
+          }
+          "version=$next" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $next"
+
+      - name: Build
+        shell: pwsh
+        run: dotnet build aliasd.csproj -c Release -p:Version=${{ steps.version.outputs.version }} -p:VatSysBin="${{ github.workspace }}\lib"
+
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          $v = "${{ steps.version.outputs.version }}"
+          $stage = "package\aliasd"
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item bin\Release\AliasPlugin.dll, AliasPlugin.ini, Alias.txt, Alias.example.txt, README.md, LICENSE $stage
+          $zip = "aliasd-v$v.zip"
+          Compress-Archive -Path $stage -DestinationPath $zip -Force
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aliasd-v${{ steps.version.outputs.version }}
+          path: ${{ steps.package.outputs.zip }}
+
+      - name: Publish release
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $v = "v${{ steps.version.outputs.version }}"
+          gh release create $v "${{ steps.package.outputs.zip }}" --target $env:GITHUB_SHA --title "aliasd $v" --generate-notes

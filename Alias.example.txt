@@ -1,0 +1,103 @@
+; =====================================================================
+;  aliasd - example alias file
+; =====================================================================
+;
+;  To use your own aliases, rename this file to Alias.txt (or merge it into
+;  the existing Alias.txt) in the plugin folder, then use
+;  Tools > Aliases > Reload Aliases in vatSys.
+;
+;  FORMAT (same as CRC / VRC alias files)
+;  ---------------------------------------------------------------------
+;    .name text to send
+;
+;    - One alias per line, starting with '.'.
+;    - Names are case-insensitive (.RBC == .rbc).
+;    - Lines starting with ';' are comments. Any other line that does not
+;      start with '.' (e.g. ##### section headers) is ignored.
+;    - If a name is defined twice, the later definition wins.
+;
+;  USING ALIASES IN vatSys
+;  ---------------------------------------------------------------------
+;    Type the alias and press Enter: it is replaced with the full text but
+;    NOT sent. Press Enter again to send.
+;
+;      .rbc                      -> Readback correct.
+;      .climb FL350              -> $1 is replaced with FL350
+;      AAL27 .rbc                -> aliases also work inside a sentence
+;
+;    If any .word in the message is not a known alias, the message is NOT
+;    sent and an error is shown.
+;
+;    Unfilled variables are selected after expansion:
+;      type        -> replaces the selected variable
+;      Tab         -> next variable       Shift+Tab -> previous variable
+;      Left/Right  -> move between variables while one is selected
+;
+;  ARGUMENTS
+;  ---------------------------------------------------------------------
+;    $1 $2 ... $9    words typed after the alias name
+;                    (only when the message starts with the alias)
+;
+;  VARIABLES - target aircraft
+;  (callsign box > private chat partner > Message Editor aircraft > selected track)
+;  ---------------------------------------------------------------------
+;    $aircraft       callsign of the target aircraft
+;    $squawk         assigned squawk code
+;    $dep            departure airport
+;    $arr            arrival airport
+;    $route          filed route
+;    $type           aircraft type
+;    $cruise         requested cruise level
+;    $temp           cleared (temporary) level
+;    $alt            cleared level if set, otherwise cruise level
+;    $calt           current altitude
+;
+;  VARIABLES - yourself
+;  ---------------------------------------------------------------------
+;    $callsign       your callsign
+;    $myrealname     your real name
+;    $com1           your primary frequency
+;    $freq()         your primary frequency
+;    $freq(XX)       frequency of sector / controller XX
+;    $radioname()    your sector's full name
+;    $radioname(XX)  full name of sector / controller XX
+;    $time  $utc     current UTC time (HHmm)
+;
+;  FUNCTIONS
+;  ---------------------------------------------------------------------
+;    $uc(text)       UPPER CASE
+;    $lc(text)       lower case
+;
+;  Variables vatSys cannot provide (e.g. $metar(), $altim(), $wind())
+;  are left in the text and selected so you can type the value.
+;
+;  Altitudes at or above TransitionAltitude (AliasPlugin.ini) are shown
+;  as FLxxx, otherwise in feet.
+; =====================================================================
+
+##########################################################
+GENERAL
+##########################################################
+.hi Hello, $radioname() on $com1, go ahead.
+.rbc Readback correct.
+.sby Standby.
+.say Say again.
+.brb Attention all aircraft, $radioname() will be back in $1 minutes.
+.closing Attention all aircraft, $radioname() is closing. Thanks for flying!
+
+##########################################################
+CLEARANCE DELIVERY
+##########################################################
+.clr Cleared to $arr via $route, climb $1, expect $cruise 10 minutes after departure, squawk $squawk.
+.sq Squawk $squawk.
+.sidchart Do you have the $uc($1) departure chart on board?
+
+##########################################################
+RADAR
+##########################################################
+.climb Climb and maintain $1.
+.desc Descend and maintain $1.
+.dct Proceed direct $uc($1).
+.ct Contact $radioname($1) on $freq($1).
+.radar Radar contact, $calt.
+.wx Wind $wind($1), altimeter $altim($1).
