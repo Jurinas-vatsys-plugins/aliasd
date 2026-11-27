@@ -56,7 +56,14 @@ Requires the .NET SDK and the .NET Framework 4.7.2 targeting pack.
 dotnet build -c Release
 ```
 
-By default the project references `vatSys.exe` from `C:\Program Files (x86)\vatSys\bin`; override with `-p:VatSysBin=<folder>`. CI builds against the reference assemblies in `lib/`.
+The project references `vatSys.exe` from `C:\Program Files (x86)\vatSys\bin` when vatSys is installed, otherwise the API-only reference assemblies in `lib/` (generated with [Refasmer](https://github.com/JetBrains/Refasmer); they contain no vatSys code). Override with `-p:VatSysBin=<folder>`.
+
+To regenerate `lib/` after a vatSys update:
+
+```
+dotnet tool install -g JetBrains.Refasmer.CliTool
+refasmer -p --omit-non-api-members=true -O lib <copy of vatSys.exe> <copy of RossCarlson.Vatsim.Network.dll>
+```
 
 Every push to `main` builds the plugin and publishes a GitHub release, bumping the patch version (starting at `1.0.1`).
 

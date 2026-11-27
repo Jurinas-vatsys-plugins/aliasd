@@ -11,7 +11,9 @@
     <Version>1.0.1</Version>
     <Product>aliasd</Product>
     <Description>CRC-style alias expansion for vatSys</Description>
-    <VatSysBin Condition="'$(VatSysBin)' == ''">C:\Program Files (x86)\vatSys\bin</VatSysBin>
+    <!-- Installed vatSys if present, otherwise the API-only reference assemblies in lib/ -->
+    <VatSysBin Condition="'$(VatSysBin)' == '' and Exists('C:\Program Files (x86)\vatSys\bin\vatSys.exe')">C:\Program Files (x86)\vatSys\bin</VatSysBin>
+    <VatSysBin Condition="'$(VatSysBin)' == ''">$(MSBuildThisFileDirectory)lib</VatSysBin>
   </PropertyGroup>
 
   <ItemGroup>
